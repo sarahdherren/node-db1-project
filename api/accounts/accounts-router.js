@@ -18,30 +18,50 @@ router.get('/', async (req, res, next) => {
 })
 
 router.get('/:id', checkAccountId, async (req, res, next) => {
-  const { id } = req.params;
   try {
-    const account = await Accounts.getById(id)
-    res.status(200).json(account)
+    res.status(200).json(req.account)
   } catch (error) {
     next(error)
   }
 })
 
-router.post('/', checkAccountNameUnique, checkAccountPayload, async (req, res, next) => {
-  // DO YOUR MAGIC
+router.post('/', checkAccountPayload, checkAccountNameUnique, async (req, res, next) => {
+  try {
+   const newAccount = await Accounts.create({
+    name: req.body.name.trim(),
+    budget: req.body.budget
+   })
+   res.status(201).json(newAccount)
+  } catch (error) {
+   next(error) 
+  }
 })
 
 router.put('/:id', checkAccountId, checkAccountPayload, async (req, res, next) => {
-  // DO YOUR MAGIC
+  const { id } = req.params
+  try {
+    const updateAccount = await Accounts.updateById(id, req.body)
+    res.status(200).json(updateAccount)
+  } catch (error) {
+    next(error)
+  }
 });
 
 router.delete('/:id', checkAccountId, async (req, res, next) => {
-  // DO YOUR MAGIC
+  const { id } = req.params
+  try {
+    await Accounts.deleteById(id)
+    res.status(200).json({
+      message: `account with id ${id} has successfully been deleted`
+    })
+  } catch (error) {
+    next(error)
+  }
 })
 
-router.use((err, req, res, next) => { // eslint-disable-line
-  res.status(err.status || 500).json({
-    message: err.message
+router.use((error, req, res, next) => { // eslint-disable-line
+  res.status(error.status || 500).json({
+    message: error.message
   })
 })
 
